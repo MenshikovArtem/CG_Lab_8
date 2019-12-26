@@ -130,11 +130,19 @@ end;
 
 procedure TForm1.Button3Click(Sender: TObject); // Процедура отсечения
 
+type
+  TypeP = record
+    x,y:integer;
+  end;
+
 var
+  P:array [1..2] of TypeP;//концы отрезка
+  P_:array [1..2] of TypeP;// виидимые концы отрезка
+  PTemp :TypeP;
   p1, p2: byte;
-  x0, y0, x1new, x2new, y1new, y2new,sum1,sum2: Integer;
+  x0, y0, x1new, x2new, y1new, y2new,sum1,sum2,Flag: Integer;
   stop: boolean;
-  FLAG, flag2, FlagFirstIn, FlagSecondIn: boolean;
+   flag2, FlagFirstIn, FlagSecondIn: boolean;
   S, S2: STRiNG;
   label l1,l2,l3,l4,l5,l6,l7,l8;
 
@@ -148,7 +156,7 @@ begin
   b := y2 - k * x2;
 
   // (x1,y1)(x2,y2)-координаты отрезка
-  // (xpr1,ypr1)(xpr2,ypr2) -
+  // (xpr1,ypr1)(xpr2,ypr2) - 
 
   xle := Min(xpr1, xpr2);
   xr := Max(xpr1, xpr2);
@@ -165,11 +173,14 @@ begin
   T2code[2] := BoolToInt(y2 > yb);
   T2code[1] := BoolToInt(y2 < yt);
 
-  FLAG := false;
-  x1new := x1;
-  x2new := x2;
-  y1new := y1;
-  y2new := y2;
+  FLAG := 0;
+
+  P[1].x:=x1;
+  P[1].y:=y1;
+  P[2].x:=x2;
+  P[2].y:=y2;
+  P_[1]:=P[1];
+  P_[2]:=P[2];
   k := high(xr); // максимальное число типа переменной xr т е инта
 
   sum1:=0;
@@ -181,9 +192,64 @@ begin
       sum2:=sum2 +  T2code[i];
     end;
 
-  if (sum1 = 0) and (sum2 = 0) then 
-  
+  // if (sum1 = 0) and (sum2 = 0) then 
 
+  numb := 0;
+
+  l1:
+    if numb <> 0 then P_[numb]:= PTemp;
+    inc(numb);
+    if numb>2 then goto l7;
+    PTemp:=P[numb];
+
+  l2:
+    if (x2-x1 ) = 0 then goto l4;
+    k:=(y2-y1)/(x2-x1);
+    if xle < PTemp.x then goto l3;
+    y:=k*(xle- PTemp.x ) +PTemp.y;
+    if y < yt then goto l3;  {? в исходном алгоритме другие знаки }
+    if y > yb then goto l3;
+    PTemp.y:=y;
+    PTemp.x:=xle;
+    goto l1;
+
+  l3:
+    if xr>PTemp.x then goto l4;
+    y:=k*(xr- PTemp.x ) +PTemp.y;
+
+    if y < yt then goto l4;  {? в исходном алгоритме другие знаки }
+    if y > yb then goto l4;
+    PTemp.y:=y;
+    PTemp.x:=xr;
+    goto l1;
+  
+  l4: 
+    if k = 0 then goto l1;
+    if yt < PTemp.y then goto l5;
+    x:= (1/k)*(yt- PTemp.y) + PTemp.x;
+    if x<xle then goto l5;
+    if x > xr then goto l5;
+    PTemp.x:=x;
+    PTemp.y:=yt;
+    goto l1;
+
+  l5:
+    if yb> PTemp.y then Showmessage('Ошибка)');
+    x := (1/m)*(yb- PTemp.y) + PTemp.x;
+    if x < xle then goto l6;
+    if x > xr then goto l6;
+    PTemp.x:=x;
+    PTemp.y:=yb;
+    goto l1;
+
+  l6:
+    flag:= -1;
+
+  l7:
+    if flag = -1 then goto l8;
+    Image1.Canvas.MoveTo(P_[1].x, P_[1].y); // Рисуем отрезок
+    Image1.Canvas.LineTo(P_[2].x, P_[2].y);
+  l8:;;;;
 end;
 
 procedure TForm1.Image1MouseDown(Sender: TObject; Button: TMouseButton;
