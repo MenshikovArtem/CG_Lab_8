@@ -14,6 +14,7 @@ type
     Button2: TButton;
     Button3: TButton;
     Button4: TButton;
+    Button5: TButton;
     procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button2Click(Sender: TObject);
@@ -21,6 +22,7 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure Button3Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
+    procedure Button5Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -70,7 +72,7 @@ end;
 
 procedure TForm1.Button1Click(Sender: TObject); // Процедура рисования отрезка
 begin
-  Showmessage('Выберите две точки, обозначающие концы отрезка...');
+  // Showmessage('Выберите две точки, обозначающие концы отрезка...');
   // Поясняющий комментарий для пользователя
   if Button1.Caption = 'Нарисовать отрезок' then
   begin
@@ -81,8 +83,8 @@ end;
 procedure TForm1.Button2Click(Sender: TObject);
 // Процедура рисования прямоугольнкиа
 begin
-  Showmessage
-    ('Выберите две диагональные точки, по которым будет построен прямоугольник...');
+  // Showmessage
+  // ('Выберите две диагональные точки, по которым будет построен прямоугольник...');
   // Поясняющий комментарий для пользователя
   pr := true; // Присваиваем булевой переменной pr значение True
 end;
@@ -95,7 +97,12 @@ begin
 
   Image1.Canvas.FillRect(Form1.ClientRect); // Очищаем
   otr1 := false;
-  Showmessage('Очистка выполнена!'); // Поясняющий комментарий для пользователя
+  // Showmessage('Очистка выполнена!'); // Поясняющий комментарий для пользователя
+end;
+
+procedure TForm1.Button5Click(Sender: TObject);
+begin
+  close;
 end;
 
 Function Min(a, b: Integer): Integer;
@@ -132,19 +139,20 @@ procedure TForm1.Button3Click(Sender: TObject); // Процедура отсеч
 
 type
   TypeP = record
-    x,y:integer;
+    X, Y: Integer;
   end;
 
 var
-  P:array [1..2] of TypeP;//концы отрезка
-  P_:array [1..2] of TypeP;// виидимые концы отрезка
-  PTemp :TypeP;
+  P: array [1 .. 2] of TypeP; // концы отрезка
+  P_: array [1 .. 2] of TypeP; // виидимые концы отрезка
+  PTemp: TypeP;
   p1, p2: byte;
-  x0, y0, x1new, x2new, y1new, y2new,sum1,sum2,Flag: Integer;
+  x0, y0, x1new, x2new, y1new, y2new, sum1, sum2, Flag, prod, numb, X,
+    Y: Integer;
   stop: boolean;
-   flag2, FlagFirstIn, FlagSecondIn: boolean;
+  flag2, FlagFirstIn, FlagSecondIn: boolean;
   S, S2: STRiNG;
-  label l1,l2,l3,l4,l5,l6,l7,l8;
+label l1, l2, l3, l4, l5, l6, l7, l8;
 
 begin
 
@@ -156,7 +164,7 @@ begin
   b := y2 - k * x2;
 
   // (x1,y1)(x2,y2)-координаты отрезка
-  // (xpr1,ypr1)(xpr2,ypr2) - 
+  // (xpr1,ypr1)(xpr2,ypr2) -
 
   xle := Min(xpr1, xpr2);
   xr := Max(xpr1, xpr2);
@@ -173,83 +181,129 @@ begin
   T2code[2] := BoolToInt(y2 > yb);
   T2code[1] := BoolToInt(y2 < yt);
 
-  FLAG := 0;
+  Flag := 0;
 
-  P[1].x:=x1;
-  P[1].y:=y1;
-  P[2].x:=x2;
-  P[2].y:=y2;
-  P_[1]:=P[1];
-  P_[2]:=P[2];
+  P[1].X := x1;
+  P[1].Y := y1;
+  P[2].X := x2;
+  P[2].Y := y2;
+  P_[1] := P[1];
+  P_[2] := P[2];
   k := high(xr); // максимальное число типа переменной xr т е инта
 
-  sum1:=0;
-  sum2:=0;
+  sum1 := 0;
+  sum2 := 0;
 
-  for i  := 1 to 4 do
+  for i := 1 to 4 do
+  begin
+    sum1 := sum1 + T1code[i];
+    sum2 := sum2 + T2code[i];
+  end;
+
+  if (sum1 = 0) and (sum2 = 0) then
+    goto l7;
+
+  prod := 0;
+
+  for i := 1 to 4 do
+  begin
+    prod := prod + ((T1code[i] + T2code[i]) div 2);
+    if prod <> 0 then
     begin
-      sum1:=sum1 +  T1code[i];
-      sum2:=sum2 +  T2code[i];
+      Flag := -1;
+      goto l7;
     end;
+  end;
 
-  // if (sum1 = 0) and (sum2 = 0) then 
+  if sum1 = 0 then
+  begin
+    numb := 1;
+    P_[1] := P[1];
+    PTemp := P[2];
+    goto l2;
+  end;
+
+  if sum2 = 0 then
+  begin
+    numb := 2;
+    P_[1] := P[2];
+    PTemp := P[1];
+    goto l2;
+  end;
 
   numb := 0;
 
-  l1:
-    if numb <> 0 then P_[numb]:= PTemp;
-    inc(numb);
-    if numb>2 then goto l7;
-    PTemp:=P[numb];
+l1:
+  if numb <> 0 then
+    P_[numb] := PTemp;
+  inc(numb);
+  if numb > 2 then
+    goto l7;
+  PTemp := P[numb];
 
-  l2:
-    if (x2-x1 ) = 0 then goto l4;
-    k:=(y2-y1)/(x2-x1);
-    if xle < PTemp.x then goto l3;
-    y:=k*(xle- PTemp.x ) +PTemp.y;
-    if y < yt then goto l3;  {? в исходном алгоритме другие знаки }
-    if y > yb then goto l3;
-    PTemp.y:=y;
-    PTemp.x:=xle;
+l2:
+  if (x2 - x1) = 0 then
+    goto l4;
+  k := (y2 - y1) / (x2 - x1);
+  if xle < PTemp.X then
+    goto l3;
+  Y := round(k * (xle - PTemp.X) + PTemp.Y);
+  if Y < yt then
+    goto l3; { ? в исходном алгоритме другие знаки }
+  if Y > yb then
+    goto l3;
+  PTemp.Y := Y;
+  PTemp.X := xle;
+  goto l1;
+
+l3:
+  if xr > PTemp.X then
+    goto l4;
+  Y := round(k * (xr - PTemp.X) + PTemp.Y);
+
+  if Y < yt then
+    goto l4; { ? в исходном алгоритме другие знаки }
+  if Y > yb then
+    goto l4;
+  PTemp.Y := Y;
+  PTemp.X := xr;
+  goto l1;
+
+l4:
+  if k = 0 then
     goto l1;
+  if yt < PTemp.Y then
+    goto l5;
+  X := round((1 / k) * (yt - PTemp.Y) + PTemp.X);
+  if X < xle then
+    goto l5;
+  if X > xr then
+    goto l5;
+  PTemp.X := X;
+  PTemp.Y := yt;
+  goto l1;
 
-  l3:
-    if xr>PTemp.x then goto l4;
-    y:=k*(xr- PTemp.x ) +PTemp.y;
+l5:
+  if yb > PTemp.Y then
+    Showmessage('Ошибка)');
+  X := round((1 / k) * (yb - PTemp.Y) + PTemp.X);
+  if X < xle then
+    goto l6;
+  if X > xr then
+    goto l6;
+  PTemp.X := X;
+  PTemp.Y := yb;
+  goto l1;
 
-    if y < yt then goto l4;  {? в исходном алгоритме другие знаки }
-    if y > yb then goto l4;
-    PTemp.y:=y;
-    PTemp.x:=xr;
-    goto l1;
-  
-  l4: 
-    if k = 0 then goto l1;
-    if yt < PTemp.y then goto l5;
-    x:= (1/k)*(yt- PTemp.y) + PTemp.x;
-    if x<xle then goto l5;
-    if x > xr then goto l5;
-    PTemp.x:=x;
-    PTemp.y:=yt;
-    goto l1;
+l6:
+  Flag := -1;
 
-  l5:
-    if yb> PTemp.y then Showmessage('Ошибка)');
-    x := (1/m)*(yb- PTemp.y) + PTemp.x;
-    if x < xle then goto l6;
-    if x > xr then goto l6;
-    PTemp.x:=x;
-    PTemp.y:=yb;
-    goto l1;
-
-  l6:
-    flag:= -1;
-
-  l7:
-    if flag = -1 then goto l8;
-    Image1.Canvas.MoveTo(P_[1].x, P_[1].y); // Рисуем отрезок
-    Image1.Canvas.LineTo(P_[2].x, P_[2].y);
-  l8:;;;;
+l7:
+  if Flag = -1 then
+    goto l8;
+  Image1.Canvas.MoveTo(P_[1].X, P_[1].Y); // Рисуем отрезок
+  Image1.Canvas.LineTo(P_[2].X, P_[2].Y);
+l8:;;;;
 end;
 
 procedure TForm1.Image1MouseDown(Sender: TObject; Button: TMouseButton;
